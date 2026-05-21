@@ -1,0 +1,5 @@
+Model,ROC-AUC,Avg Precision,F1 Score,Precision,Recall,Train Time (s)
+LightGBM,0.9806,0.8379,0.8333,0.8571,0.8108,6.4
+Random Forest,0.9781,0.8066,0.7532,0.725,0.7838,125.2
+XGBoost,0.9756,0.8223,0.8194,0.8429,0.7973,9.0
+Logistic Regression,0.9713,0.6627,0.498,0.3567,0.8243,5.9
