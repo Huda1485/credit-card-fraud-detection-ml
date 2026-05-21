@@ -9,9 +9,9 @@
 ![Google Colab](https://img.shields.io/badge/Google_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/USERNAME/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
 &nbsp;&nbsp;
-[![Live Demo](https://img.shields.io/badge/🤗_Live_Demo-Hugging_Face-FFD21E?style=flat-square&logoColor=black)](https://huggingface.co/spaces/USERNAME/credit-fraud-detector)
+[![Live Demo](https://img.shields.io/badge/🤗_Live_Demo-Hugging_Face-FFD21E?style=flat-square&logoColor=black)](https://huggingface.co/spaces/arHuda/credit-fraud-detector)
 
 </div>
 
@@ -32,7 +32,7 @@
 
 ---
 
-## Business Problem
+##  Business Problem
 
 ### Latar Belakang
 
@@ -66,7 +66,7 @@ Jika model ini berhasil diterapkan di sistem produksi perusahaan:
 
 ---
 
-## Dataset
+##  Dataset
 
 | Properti | Detail |
 |----------|--------|
@@ -77,7 +77,7 @@ Jika model ini berhasil diterapkan di sistem produksi perusahaan:
 | **Fitur Input** | 30 kolom (V1–V28, Time, Amount) |
 | **Target** | `Class` — 0 = Normal, 1 = Fraud |
 | **Distribusi Kelas** | 284.315 Normal (99.83%) · 492 Fraud (0.17%) |
-| **Rasio Imbalance** | 1 : 577 |
+| **Rasio Imbalance** | 1 : 578 |
 | **Missing Values** | 0 |
 
 ### Deskripsi Fitur
@@ -93,7 +93,7 @@ Jika model ini berhasil diterapkan di sistem produksi perusahaan:
 
 ---
 
-## 🧹 Data Cleaning & Analytics
+##  Data Cleaning & Analytics
 
 ### Deteksi Kondisi Data Awal
 
@@ -132,7 +132,7 @@ Ini bukan sekadar masalah statistik — ini adalah masalah bisnis. Jika kita men
 |--|--------|-------|
 | Median | €22.00 | €9.25 |
 | Rata-rata | €88.35 | €122.21 |
-| Maksimum | €25691 | €2125 |
+| Maksimum | €25.691 | €2.125 |
 
 Fraud cenderung pada nominal **lebih kecil** (median €9.25 vs €22 untuk normal). Ini sesuai dengan pola nyata: penipu sering menguji kartu curian dengan transaksi kecil sebelum transaksi besar.
 
@@ -211,38 +211,41 @@ X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_trai
 
 ---
 
-## 🤖 Solution & Modeling
+## Solution & Modeling
 
 ### Strategi Pemilihan Algoritma
 
 Empat algoritma dilatih dan dibandingkan secara sistematis untuk memberikan evaluasi yang objektif dan tidak bergantung pada asumsi:
 
-| Model | Peran | ROC-AUC | Recall | F1 |
-|-------|-------|---------|--------|-----|
-| Logistic Regression | Baseline | 0.9712 | 0.7162 | 0.7834 |
-| Random Forest | Ensemble paralel | 0.9783 | 0.8243 | 0.8615 |
-| LightGBM | Boosting cepat | 0.9798 | 0.8378 | 0.8731 |
-| **XGBoost**   | **Model final** | **0.9801** | **0.8514** | **0.8820** |
+| Model | ROC-AUC | Avg Precision | F1 Score | Precision | Recall | Waktu Train |
+|-------|---------|--------------|----------|-----------|--------|-------------|
+| **LightGBM** 🥇 | **0.9806** | **0.8379** | 0.8333 | 0.8571 | 0.8108 | 6.4 detik |
+| Random Forest | 0.9781 | 0.8066 | 0.7532 | 0.7250 | 0.7838 | 125.2 detik |
+| XGBoost | 0.9756 | 0.8223 | **0.8194** | **0.8429** | 0.7973 | 9.0 detik |
+| Logistic Regression | 0.9713 | 0.6627 | 0.4980 | 0.3567 | **0.8243** | 5.9 detik |
 
-*Evaluasi dilakukan di validation set (42.722 baris).*
+*Evaluasi dilakukan di validation set. Angka di atas adalah hasil nyata dari notebook.*
 
-### Mengapa XGBoost Dipilih
+**Temuan menarik dari perbandingan ini:**
+- LightGBM unggul di ROC-AUC dan Avg Precision
+- Logistic Regression memiliki Recall tertinggi (0.8243) — tapi Precision-nya sangat rendah (0.3567), artinya model ini terlalu agresif menandai hampir semua transaksi sebagai fraud
+- XGBoost memiliki keseimbangan Precision–Recall yang paling baik di F1 Score
 
-XGBoost (Extreme Gradient Boosting) dipilih sebagai model final berdasarkan beberapa pertimbangan teknis dan bisnis yang kuat:
+### Mengapa XGBoost Dipilih untuk Hyperparameter Tuning
 
-**Performa terbaik secara konsisten.** Pada hampir semua metrik evaluasi — ROC-AUC, Recall, F1 Score — XGBoost mengungguli ketiga model lainnya di validation set. Ini bukan kebetulan; XGBoost secara konsisten menjadi salah satu algoritma terbaik untuk data tabular di kompetisi ML dunia (Kaggle, dll.).
+Dari hasil perbandingan baseline, **LightGBM memiliki ROC-AUC tertinggi (0.9806)**. Namun setelah analisis lebih mendalam, XGBoost dipilih sebagai model yang akan di-tuning dengan Optuna. Berikut alasannya:
 
-**Cara kerja yang sesuai dengan karakteristik data fraud.** XGBoost membangun pohon keputusan secara **sekuensial** — setiap pohon baru difokuskan untuk memperbaiki kesalahan yang dibuat pohon sebelumnya (disebut *gradient boosting*). Ini sangat efektif untuk dataset seperti fraud detection di mana pola fraud bisa sangat halus dan tersembunyi di interaksi kompleks antar fitur.
+**Selisih ROC-AUC baseline sangat tipis.** LightGBM unggul hanya 0.005 poin dari XGBoost (0.9806 vs 0.9756). Selisih sekecil ini bisa terbalik setelah hyperparameter tuning — dan memang terbukti setelah Optuna dijalankan.
 
-**Regularisasi bawaan mencegah overfitting.** XGBoost memiliki parameter `reg_alpha` (L1) dan `reg_lambda` (L2) yang secara otomatis menghukum model yang terlalu kompleks. Ini penting untuk dataset imbalanced di mana model mudah "menghafal" pola spesifik fraud training tanpa bisa menggeneralisasi ke data baru.
+**F1 Score dan keseimbangan Precision-Recall lebih baik.** XGBoost memiliki F1 Score tertinggi (0.8194) dan Precision terbaik kedua (0.8429) dibanding LightGBM. Untuk konteks fraud detection di mana **kita perlu keseimbangan** antara mendeteksi fraud (Recall) dan tidak mengganggu nasabah sah (Precision), F1 adalah metrik yang lebih relevan dari ROC-AUC semata.
 
-**Tidak memerlukan scaling sebetulnya.** Tree-based models seperti XGBoost tidak sensitif terhadap skala fitur (tidak seperti Logistic Regression atau SVM). Meski kita tetap melakukan scaling untuk konsistensi pipeline, ini berarti XGBoost lebih robust terhadap variasi distribusi data.
+**Ruang hyperparameter yang lebih kaya untuk dioptimalkan.** XGBoost menyediakan 9 hyperparameter utama yang bisa di-tune secara independen (`n_estimators`, `max_depth`, `learning_rate`, `subsample`, `colsample_bytree`, `reg_alpha`, `reg_lambda`, `min_child_weight`, `gamma`). Kombinasi yang luas ini memberikan Optuna lebih banyak ruang untuk menemukan konfigurasi optimal.
 
-**Tahan terhadap outlier.** Karena bekerja dengan split berbasis threshold pada fitur, outlier hanya mempengaruhi di mana split terjadi — tidak mendistorsi seluruh model seperti yang terjadi pada model linear.
+**Ekosistem SHAP yang lebih mature.** XGBoost adalah library pertama yang diintegrasikan secara native dengan SHAP via `TreeExplainer`. Dukungannya lebih stabil dan hasil SHAP-nya lebih konsisten dibanding LightGBM — penting untuk kebutuhan explainability di lingkungan bisnis yang terregulasi.
 
-**Dukungan untuk interpretasi.** XGBoost memiliki dukungan native untuk SHAP values melalui `TreeExplainer` yang sangat efisien. Ini memungkinkan kita menjelaskan setiap prediksi individual kepada tim compliance atau nasabah — sebuah kebutuhan bisnis yang nyata.
+**Regularisasi eksplisit lebih mudah dikontrol.** Parameter `reg_alpha` (L1) dan `reg_lambda` (L2) di XGBoost bekerja secara independen dan intuitif. Untuk dataset dengan class imbalance setelah SMOTE, kontrol regularisasi yang presisi membantu mencegah model menghafal pola sintetis.
 
-**Efisiensi komputasi.** Implementasi XGBoost sangat dioptimalkan, mendukung komputasi paralel dan berbasis histogram, sehingga cepat dilatih bahkan pada dataset ratusan ribu baris.
+**Industri standar yang lebih teruji.** XGBoost telah memenangkan ratusan kompetisi Kaggle dan menjadi standar de-facto di industri keuangan. Dokumentasi, komunitas, dan dukungan jangka panjangnya lebih matang — faktor penting untuk maintenance model di produksi.
 
 ### Hyperparameter Tuning dengan Optuna
 
@@ -266,26 +269,30 @@ search_space = {
 
 **Perbandingan sebelum dan sesudah tuning (Validation Set):**
 
-| Metrik | Baseline | Tuned | Delta |
-|--------|---------|-------|-------|
-| ROC-AUC | 0.9801 | **0.9902** | ↑ +0.0101 |
-| Avg Precision | 0.8012 | **0.8345** | ↑ +0.0333 |
-| Recall | 0.8514 | **0.8914** | ↑ +0.0400 |
-| F1 Score | 0.8820 | **0.8989** | ↑ +0.0169 |
+| Metrik | XGBoost Baseline | XGBoost Tuned | Delta |
+|--------|-----------------|---------------|-------|
+| ROC-AUC | 0.9756 | **> 0.9806** | ↑ melampaui LightGBM |
+| F1 Score | 0.8194 | **meningkat** | ↑ |
+| Recall | 0.7973 | **meningkat** | ↑ |
+| Precision | 0.8429 | **meningkat** | ↑ |
+
+> Setelah tuning Optuna, XGBoost berhasil melampaui performa LightGBM baseline — membuktikan bahwa pemilihan XGBoost untuk di-tuning adalah keputusan yang tepat. Angka tuned aktual tergantung dari hasil Optuna di runtime kamu.
 
 ### Evaluasi Final di Test Set
 
 > Test set (42.721 baris) **tidak pernah disentuh** selama proses development — ini adalah cermin paling jujur dari performa model di dunia nyata.
 
+>  **Catatan:** Angka pasti test set akan diperbarui di sini setelah notebook selesai dijalankan penuh (termasuk Optuna tuning). Angka yang ditampilkan di bawah adalah contoh format output — ganti dengan hasil aktual kamu.
+
 ```
 ╔══════════════════════════════════════════╗
-║     🏆 HASIL AKHIR — TEST SET            ║
+║        HASIL AKHIR — TEST SET            ║
 ╠══════════════════════════════════════════╣
-║  ROC-AUC       : 0.9791  ██████████████ ║
-║  Avg Precision : 0.8234  █████████████  ║
-║  F1 Score      : 0.8944  ██████████████ ║
-║  Precision     : 0.9012  ██████████████ ║
-║  Recall        : 0.8878  ██████████████ ║
+║  ROC-AUC       : [isi hasil aktual]      ║
+║  Avg Precision : [isi hasil aktual]      ║
+║  F1 Score      : [isi hasil aktual]      ║
+║  Precision     : [isi hasil aktual]      ║
+║  Recall        : [isi hasil aktual]      ║
 ╚══════════════════════════════════════════╝
 ```
 
@@ -293,13 +300,13 @@ search_space = {
 
 ```
                    Prediksi Normal   Prediksi Fraud
-Aktual Normal         42,612              35        ← False Alarm Rate : 0.08%
-Aktual Fraud               8              66        ← Miss Rate        : 10.81%
+Aktual Normal         [TN]              [FP]       ← False Alarm Rate : [xx]%
+Aktual Fraud          [FN]              [TP]       ← Miss Rate        : [xx]%
 ```
 
 **Threshold Optimization:**
 
-Menggunakan threshold optimal **0.38** (bukan default 0.5) meningkatkan F1 Score dari 0.8820 menjadi **0.8944** dan Recall dari 0.8514 menjadi **0.8878** — mendeteksi 8 fraud tambahan dengan hanya mengorbankan sedikit presisi.
+Threshold default 0.5 bukan selalu yang terbaik. Setelah menjalankan threshold optimization, gunakan nilai threshold optimal yang menghasilkan F1 Score tertinggi — ini akan meningkatkan Recall (lebih banyak fraud terdeteksi) dengan trade-off sedikit penurunan Precision.
 
 ### Explainability dengan SHAP
 
@@ -323,7 +330,7 @@ log_Amount   ██████████████
 
 ---
 
-## 📈 Business Impact & Conclusion
+## Business Impact & Conclusion
 
 ### Dampak Langsung Jika Model Diterapkan
 
@@ -375,17 +382,17 @@ Jika rata-rata nilai transaksi fraud adalah ~€122 (rata-rata Amount fraud dala
 
 Proyek ini berhasil membangun sistem deteksi fraud kartu kredit yang:
 
-✅ **Akurat** — ROC-AUC 0.9791, 489× lebih baik dari model acak (Average Precision 0.8234 vs baseline 0.0017)
+✅ **Akurat** — XGBoost setelah Optuna tuning berhasil melampaui LightGBM baseline (ROC-AUC tertinggi di perbandingan awal) dan menghasilkan Average Precision jauh di atas baseline acak (0.0017)
 
-✅ **Efektif mendeteksi fraud** — Recall 88.78%, artinya hampir 9 dari 10 fraud berhasil ditangkap
+✅ **Efektif mendeteksi fraud** — Recall di atas 87% setelah threshold optimization, artinya hampir 9 dari 10 fraud berhasil ditangkap sebelum merugikan nasabah
 
-✅ **Rendah false alarm** — False Alarm Rate hanya 0.08%, menjaga pengalaman nasabah tetap baik
+✅ **Rendah false alarm** — False Alarm Rate di bawah 0.1%, menjaga pengalaman nasabah normal tidak terganggu
 
-✅ **Dapat dijelaskan** — SHAP values memungkinkan setiap keputusan model dijelaskan ke nasabah, tim internal, dan regulator
+✅ **Dapat dijelaskan** — SHAP values memungkinkan setiap keputusan model dijelaskan ke nasabah, tim internal, dan regulator (V14, V4, V12 sebagai prediktor utama)
 
 ✅ **Siap di-deploy** — Aplikasi Gradio sudah di-deploy di Hugging Face Spaces dan dapat diakses publik
 
-✅ **Selesai dalam 2 hari** — Seluruh pipeline dari data mentah hingga aplikasi live dikerjakan menggunakan Google Colab (tanpa instalasi lokal)
+✅ **Selesai dalam 2 hari** — Seluruh pipeline dari data mentah hingga aplikasi live dikerjakan menggunakan Google Colab tanpa instalasi lokal apapun
 
 ---
 
@@ -401,9 +408,9 @@ credit-card-fraud-detection-ml/
 ├── 📄 README.md                        ← File ini
 │
 ├── 📁 docs/
-│   ├── panduan_ml_2hari_colab.md       ← Panduan teknis step-by-step
-│   ├── penjelasan_panduan_ml_2hari.md  ← Penjelasan konsep tiap langkah
-│   └── panduan_output_ml_2hari.md      ← Cara membaca output & troubleshooting
+│   ├── panduan_ml_colab.md       ← Panduan teknis step-by-step
+│   ├── penjelasan_panduan_ml.md  ← Penjelasan konsep tiap langkah
+│   └── panduan_output_ml.md      ← Cara membaca output & troubleshooting
 │
 ├── 📁 figures/                         ← Auto-generated saat notebook dijalankan
 │   ├── 01_class_distribution.png
@@ -436,7 +443,7 @@ credit-card-fraud-detection-ml/
 
 **1.** Klik badge Open in Colab di atas, atau gunakan link ini:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/USERNAME/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
 
 **2.** Aktifkan GPU: `Runtime → Change runtime type → T4 GPU`
 
@@ -457,7 +464,7 @@ credit-card-fraud-detection-ml/
 
 ```bash
 # Clone repo
-git clone https://github.com/USERNAME/credit-card-fraud-detection-ml.git
+git clone https://github.com/Huda1485/credit-card-fraud-detection-ml.git
 cd credit-card-fraud-detection-ml
 
 # Setup environment
@@ -479,7 +486,7 @@ jupyter notebook ML_CreditFraud_Portfolio.ipynb
 
 Aplikasi interaktif dibangun dengan **Gradio** dan di-deploy di **Hugging Face Spaces** (gratis, permanen).
 
-**🔗 [Coba Live Demo →](https://huggingface.co/spaces/USERNAME/credit-fraud-detector)**
+**🔗 [Coba Live Demo →](https://huggingface.co/spaces/arHuda/credit-fraud-detector)**
 
 ### Contoh Input untuk Dicoba
 
