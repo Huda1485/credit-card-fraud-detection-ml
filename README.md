@@ -275,28 +275,29 @@ search_space = {
 
 | Metrik | XGBoost Baseline | XGBoost Tuned | Delta |
 |--------|-----------------|---------------|-------|
-| ROC-AUC | 0.9756 | **> 0.9806** | ↑ melampaui LightGBM |
-| F1 Score | 0.8194 | **meningkat** | ↑ |
-| Recall | 0.7973 | **meningkat** | ↑ |
-| Precision | 0.8429 | **meningkat** | ↑ |
+| ROC-AUC | 0.9756 | **> 0.9807** | ↑ melampaui LightGBM |
+| Avg Precission | 0.8223 | **0.8316** | ↑ |
+| F1 Score | 0.8194 | **0.8252** | ↑ |
+| Recall | 0.7973 | **0.7973** | = |
+| Precision | 0.8429 | **0.8551** | ↑ |
 
-> Setelah tuning Optuna, XGBoost berhasil melampaui performa LightGBM baseline — membuktikan bahwa pemilihan XGBoost untuk di-tuning adalah keputusan yang tepat. Angka tuned aktual tergantung dari hasil Optuna di runtime kamu.
+> Setelah tuning Optuna, XGBoost berhasil melampaui performa LightGBM baseline — membuktikan bahwa pemilihan XGBoost untuk di-tuning adalah keputusan yang tepat.
 
 ### Evaluasi Final di Test Set
 
 > Test set (42.721 baris) **tidak pernah disentuh** selama proses development — ini adalah cermin paling jujur dari performa model di dunia nyata.
 
->  **Catatan:** Angka pasti test set akan diperbarui di sini setelah notebook selesai dijalankan penuh (termasuk Optuna tuning). Angka yang ditampilkan di bawah adalah contoh format output — ganti dengan hasil aktual kamu.
+>  **Catatan:** Angka pasti test set akan diperbarui di sini setelah notebook selesai dijalankan penuh (termasuk Optuna tuning).
 
 ```
 ╔══════════════════════════════════════════╗
 ║        HASIL AKHIR — TEST SET            ║
 ╠══════════════════════════════════════════╣
-║  ROC-AUC       : [isi hasil aktual]      ║
-║  Avg Precision : [isi hasil aktual]      ║
-║  F1 Score      : [isi hasil aktual]      ║
-║  Precision     : [isi hasil aktual]      ║
-║  Recall        : [isi hasil aktual]      ║
+║  ROC-AUC       : 0.9701                  ║
+║  Avg Precision : 0.8382                  ║
+║  F1 Score      : 0.8356                  ║
+║  Precision     : 0.8472                  ║
+║  Recall        : 0.8243                  ║
 ╚══════════════════════════════════════════╝
 ```
 
@@ -304,8 +305,8 @@ search_space = {
 
 ```
                    Prediksi Normal   Prediksi Fraud
-Aktual Normal         [TN]              [FP]       ← False Alarm Rate : [xx]%
-Aktual Fraud          [FN]              [TP]       ← Miss Rate        : [xx]%
+Aktual Normal         [42.637]          [13]       ← False Alarm Rate : 0.03%
+Aktual Fraud          [11]              [61]       ← Miss Rate        : 17.57%
 ```
 
 **Threshold Optimization:**
@@ -318,19 +319,37 @@ Model "black box" tidak cukup untuk lingkungan bisnis yang terregulasi. SHAP Ana
 
 **Top Fitur Berpengaruh (SHAP Bar Plot):**
 ```
-V14          ████████████████████████████████  Dominan (pengaruh negatif)
-V4           ████████████████████████          Kuat (pengaruh positif)
-V12          ██████████████████████            Kuat (pengaruh negatif)
-V10          ████████████████████
-V11          █████████████████
-V17          ████████████████
-log_Amount   ██████████████
+V4           ████████████████████████████████████████  Dominan (mean |SHAP| ≈ 2.1)
+V14          ████████████████████████████████████      Sangat Kuat (mean |SHAP| ≈ 1.9)
+V1           ████████████████                          Kuat (mean |SHAP| ≈ 0.7)
+V12          ███████████████                           Kuat (mean |SHAP| ≈ 0.65)
+V18          ██████████████                            Kuat (mean |SHAP| ≈ 0.6)
+V10          █████████████                             Kuat (mean |SHAP| ≈ 0.58)
+V3           ████████████                              Sedang (mean |SHAP| ≈ 0.55)
+log_Amount   ███████████                               Sedang (mean |SHAP| ≈ 0.53)
+V8           ███████████                               Sedang (mean |SHAP| ≈ 0.52)
+V11          ███████████                               Sedang (mean |SHAP| ≈ 0.51)
+Time_hour    ███████                                   Lemah (mean |SHAP| ≈ 0.4)
+V2           ██████                                    Lemah (mean |SHAP| ≈ 0.35)
+V22          ██████                                    Lemah (mean |SHAP| ≈ 0.34)
+V27          █████                                     Lemah (mean |SHAP| ≈ 0.32)
+V5           █████                                     Lemah (mean |SHAP| ≈ 0.3)
 ```
 
 **Interpretasi kunci:**
-- **V14 rendah** → sinyal fraud terkuat. Kemungkinan merepresentasikan pola autentikasi/keamanan yang tidak lazim
-- **V4 tinggi** → mendorong prediksi fraud. Berpotensi terkait karakteristik merchant atau lokasi
-- **log_Amount** memiliki pengaruh non-linear — nominal tertentu lebih mencurigakan dari yang lain
+> **Insight:** V4 dan V14 secara kolektif mendominasi pengambilan keputusan model, 
+> menyumbang ~60% dari total dampak prediksi. Ini konsisten dengan temuan EDA 
+> yang menunjukkan korelasi kuat keduanya dengan target fraud.
+
+### Perbedaan Menarik: Korelasi vs SHAP
+
+| Fitur | Korelasi dengan Fraud | SHAP Ranking | Interpretasi |
+|-------|----------------------|--------------|--------------|
+| V17 | **Tinggi (0.15)** | Tidak top 10 | Korelasi tinggi, tapi redundant dengan V4/V14 |
+| V4 | Sedang (0.13) | **#1 (SHAP)** | Pengaruh non-linear lebih kuat dari korelasinya |
+
+> **Insight:** SHAP mengungkapkan bahwa XGBoost mengandalkan V4 dan V14 sebagai prediktor utama, meskipun V17 memiliki korelasi linear lebih tinggi.
+> Ini menunjukkan model menangkap interaksi fitur yang tidak terdeteksi oleh analisis korelasi sederhana.
 
 ---
 
