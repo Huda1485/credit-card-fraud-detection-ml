@@ -77,7 +77,7 @@ Jika model ini berhasil diterapkan di sistem produksi perusahaan:
 | **Fitur Input** | 30 kolom (V1–V28, Time, Amount) |
 | **Target** | `Class` — 0 = Normal, 1 = Fraud |
 | **Distribusi Kelas** | 284.315 Normal (99.83%) · 492 Fraud (0.17%) |
-| **Rasio Imbalance** | 1 : 578 |
+| **Rasio Imbalance** | 1 : 577 |
 | **Missing Values** | 0 |
 
 ### Deskripsi Fitur
