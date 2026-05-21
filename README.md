@@ -9,7 +9,7 @@
 ![Google Colab](https://img.shields.io/badge/Google_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud.ipynb)
 &nbsp;&nbsp;
 [![Live Demo](https://img.shields.io/badge/🤗_Live_Demo-Hugging_Face-FFD21E?style=flat-square&logoColor=black)](https://huggingface.co/spaces/arHuda/credit-fraud-detector)
 
@@ -443,7 +443,7 @@ credit-card-fraud-detection-ml/
 
 **1.** Klik badge Open in Colab di atas, atau gunakan link ini:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud_Portfolio.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Huda1485/credit-card-fraud-detection-ml/blob/main/ML_CreditFraud.ipynb)
 
 **2.** Aktifkan GPU: `Runtime → Change runtime type → T4 GPU`
 
