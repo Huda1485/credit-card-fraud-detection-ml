@@ -117,7 +117,7 @@ print(f"Duplikat        : {df.duplicated().sum()}")   # 1,081
 Normal  ████████████████████████████████████████████████  99.83%  (284.315 baris)
 Fraud   ▎                                                   0.17%  (    492 baris)
 
-Rasio imbalance: 1 : 578
+Rasio imbalance: 1 : 577
 ```
 
 Ini bukan sekadar masalah statistik — ini adalah masalah bisnis. Jika kita menggunakan **akurasi** sebagai metrik, model yang tidak pernah mendeteksi fraud pun mendapat nilai 99.83%. Solusinya:
