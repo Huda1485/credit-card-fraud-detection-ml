@@ -146,7 +146,7 @@ Keberadaan outlier ini menjadi pertimbangan penting dalam pemilihan teknik scali
 
 **Distribusi Fitur V1–V28:**
 
-Analisis overlay histogram untuk setiap fitur V menunjukkan bahwa beberapa fitur memiliki distribusi yang **sangat berbeda** antara kelas Normal dan Fraud — terutama V14, V12, V10, V4, dan V11. Fitur-fitur ini adalah kandidat kuat sebagai prediktor fraud.
+Analisis overlay histogram untuk setiap fitur V menunjukkan bahwa beberapa fitur memiliki distribusi yang **sangat berbeda** antara kelas Normal dan Fraud — terutama V17, V14, V12, V10, V4, dan V11. Fitur-fitur ini adalah kandidat kuat sebagai prediktor fraud.
 
 **Heatmap Korelasi (Top 10 Fitur dengan Target):**
 
@@ -156,8 +156,12 @@ Analisis overlay histogram untuk setiap fitur V menunjukkan bahwa beberapa fitur
 | **V14** | 0.303 | Negatif |
 | **V12** | 0.260 | Negatif |
 | **V10** | 0.217 | Negatif |
+| **V16** | 0.196 | Negatif |
+| **V3** | 0.192 | Negatif |
+| **V7** | 0.187 | Negatif | ----
 | **V11** | 0.155 | Positif |
 | **V4** | 0.133 | Positif |
+| **V16** | 0.111 | Negatif |
 
 ### Preprocessing & Feature Engineering
 
